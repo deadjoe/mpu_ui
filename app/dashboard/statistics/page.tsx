@@ -66,7 +66,9 @@ const performanceMetrics = [
 ]
 
 const activityData = Array.from({ length: 7 }, (_, i) => ({
-  date: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { weekday: 'short' }),
+  date: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
+    weekday: 'short',
+  }),
   requests: Math.floor(Math.random() * 1000) + 500,
   errors: Math.floor(Math.random() * 50),
 }))
@@ -123,7 +125,7 @@ export default function StatisticsPage() {
           <div className="mt-4 sm:mt-0">
             <select
               value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
+              onChange={e => setTimeRange(e.target.value)}
               className="block w-full pl-3 pr-10 py-2 text-sm border rounded-md bg-background text-foreground border-input hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="24h">Last 24 Hours</option>
@@ -140,15 +142,13 @@ export default function StatisticsPage() {
             { name: 'Active Services', value: '5' },
             { name: 'Total CPU Cores', value: '48' },
             { name: 'Total Memory (GB)', value: '256' },
-          ].map((stat) => (
+          ].map(stat => (
             <div
               key={stat.name}
               className="bg-card overflow-hidden rounded-lg border border-border/30 hover:border-border/60 transition-colors"
             >
               <div className="px-6 py-6 flex flex-col items-center text-center">
-                <dt className="text-base font-semibold text-muted-foreground">
-                  {stat.name}
-                </dt>
+                <dt className="text-base font-semibold text-muted-foreground">{stat.name}</dt>
                 <dd className="mt-2 text-4xl font-bold tracking-tight text-foreground">
                   {stat.value}
                 </dd>
@@ -158,312 +158,246 @@ export default function StatisticsPage() {
         </div>
 
         {/* Charts Grid */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-          {/* Resource Usage Chart */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Resource Usage by Service
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={resourceUsageData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="cpu" fill={COLORS[0]} name="CPU %" />
-                  <Bar dataKey="memory" fill={COLORS[1]} name="Memory %" />
-                  <Bar dataKey="storage" fill={COLORS[2]} name="Storage %" />
-                </BarChart>
-              </ResponsiveContainer>
+        <div className="grid grid-cols-1 gap-6">
+          {/* Main Metrics Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Resource Usage Chart */}
+            <div className="bg-card rounded-lg p-6 border border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Resource Usage by Service
+              </h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={resourceUsageData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="cpu" fill={COLORS[0]} name="CPU %" />
+                    <Bar dataKey="memory" fill={COLORS[1]} name="Memory %" />
+                    <Bar dataKey="storage" fill={COLORS[2]} name="Storage %" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          </div>
 
-          {/* System Performance Radar */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              System Performance Metrics
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={performanceMetrics}>
-                  <PolarGrid />
-                  <PolarAngleAxis dataKey="subject" />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                  <Radar name="Performance" dataKey="A" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.6} />
-                  <Legend />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Active Users Area Chart */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Active Users Over Time
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={timeSeriesData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey="activeUsers"
-                    stroke={AREA_COLORS[0]}
-                    fill={AREA_COLORS[0]}
-                    fillOpacity={0.3}
-                    name="Active Users"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* System Activity Chart */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              System Activity (Last 7 Days)
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={activityData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="requests"
-                    stroke={COLORS[0]}
-                    name="Total Requests"
-                  />
-                  <Line
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="errors"
-                    stroke={COLORS[3]}
-                    name="Errors"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Instance Status Pie Chart */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Instance Status Distribution
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={instanceStatusData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name} ${(percent * 100).toFixed(0)}%`
-                    }
-                  >
-                    {instanceStatusData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Resource Trends */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Resource Usage Trends
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={timeSeriesData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="totalCpu"
-                    stroke={COLORS[0]}
-                    name="CPU Usage %"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="totalMemory"
-                    stroke={COLORS[1]}
-                    name="Memory Usage %"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        {/* Additional Charts Grid */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {/* Treemap Storage Distribution */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Storage Distribution (MB)
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <Treemap
-                  data={storageDistribution}
-                  dataKey="size"
-                  nameKey="name"
-                  stroke="#374151"
-                  fill={COLORS[0]}
-                >
-                  <Tooltip
-                    formatter={(value) => `${value} MB`}
-                  />
-                </Treemap>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Network Traffic Composed Chart */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Network Traffic (MB/s)
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={networkTraffic}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey="inbound"
-                    fill={COLORS[0]}
-                    stroke={COLORS[0]}
-                    fillOpacity={0.3}
-                    name="Inbound"
-                  />
-                  <Bar
-                    dataKey="outbound"
-                    fill={COLORS[1]}
-                    name="Outbound"
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Service Health Radial Bars */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Service Health
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadialBarChart
-                  innerRadius="30%"
-                  outerRadius="100%"
-                  data={serviceHealth}
-                  startAngle={180}
-                  endAngle={0}
-                >
-                  <RadialBar
-                    minAngle={15}
-                    background
-                    clockWise={true}
-                    dataKey="value"
-                    cornerRadius={10}
-                  />
-                  <Legend
-                    iconSize={10}
-                    width={120}
-                    height={140}
-                    layout="vertical"
-                    verticalAlign="middle"
-                    align="right"
-                  />
-                  <Tooltip />
-                </RadialBarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Error Distribution Funnel */}
-          <div className="bg-card rounded-lg p-6 border border-border/30 lg:col-span-2">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              Error Distribution
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <FunnelChart>
-                  <Funnel
-                    dataKey="value"
-                    data={errorDistribution}
-                    isAnimationActive
-                  >
-                    <LabelList
-                      position="right"
-                      fill="#fff"
-                      stroke="none"
-                      dataKey="name"
+            {/* Resource Usage Trends */}
+            <div className="bg-card rounded-lg p-6 border border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Resource Usage Trends</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={timeSeriesData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="time" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="totalCpu"
+                      stroke={COLORS[0]}
+                      name="CPU Usage %"
                     />
-                    <LabelList
-                      position="right"
-                      fill="#fff"
-                      stroke="none"
+                    <Line
+                      type="monotone"
+                      dataKey="totalMemory"
+                      stroke={COLORS[1]}
+                      name="Memory Usage %"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* System Health Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Instance Status */}
+            <div className="bg-card rounded-lg p-6 border border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Instance Status Distribution
+              </h3>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={instanceStatusData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
                       dataKey="value"
-                      offset={40}
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {instanceStatusData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Service Health */}
+            <div className="bg-card rounded-lg p-6 border border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Service Health</h3>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart data={performanceMetrics}>
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="subject" />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                    <Radar
+                      name="Performance"
+                      dataKey="A"
+                      stroke={COLORS[0]}
+                      fill={COLORS[0]}
+                      fillOpacity={0.6}
                     />
-                  </Funnel>
-                  <Tooltip />
-                </FunnelChart>
-              </ResponsiveContainer>
+                    <Legend />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Error Distribution */}
+            <div className="bg-card rounded-lg p-6 border border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Error Distribution</h3>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={errorDistribution}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                    >
+                      {errorDistribution.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
 
-          {/* CPU Core Distribution */}
-          <div className="bg-card rounded-lg p-6 border border-border/30">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
-              CPU Core Load Distribution
-            </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" dataKey="x" name="Core" />
-                  <YAxis type="number" dataKey="y" name="Load" />
-                  <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                  <Scatter
-                    name="CPU Cores"
-                    data={Array.from({ length: 16 }, (_, i) => ({
-                      x: i + 1,
-                      y: Math.floor(Math.random() * 100),
-                    }))}
+          {/* Activity and Performance Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* System Activity */}
+            <div className="bg-card rounded-lg p-6 border border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                System Activity (Last 7 Days)
+              </h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={activityData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="requests"
+                      stroke={COLORS[0]}
+                      name="Total Requests"
+                    />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="errors"
+                      stroke={COLORS[3]}
+                      name="Errors"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Network Traffic */}
+            <div className="bg-card rounded-lg p-6 border border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Network Traffic (MB/s)</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={networkTraffic}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="time" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Area
+                      type="monotone"
+                      dataKey="inbound"
+                      fill={COLORS[0]}
+                      stroke={COLORS[0]}
+                      fillOpacity={0.3}
+                      name="Inbound"
+                    />
+                    <Bar dataKey="outbound" fill={COLORS[1]} name="Outbound" />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Storage Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Storage Distribution */}
+            <div className="bg-card rounded-lg p-6 border border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Storage Distribution (MB)
+              </h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <Treemap
+                    data={storageDistribution}
+                    dataKey="size"
+                    nameKey="name"
+                    stroke="#374151"
                     fill={COLORS[0]}
-                  />
-                </ScatterChart>
-              </ResponsiveContainer>
+                  >
+                    <Tooltip formatter={value => `${value} MB`} />
+                  </Treemap>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* CPU Core Distribution */}
+            <div className="bg-card rounded-lg p-6 border border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                CPU Core Load Distribution
+              </h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ScatterChart>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" dataKey="x" name="Core" />
+                    <YAxis type="number" dataKey="y" name="Load" />
+                    <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                    <Scatter
+                      name="CPU Cores"
+                      data={Array.from({ length: 16 }, (_, i) => ({
+                        x: i + 1,
+                        y: Math.floor(Math.random() * 100),
+                      }))}
+                      fill={COLORS[0]}
+                    />
+                  </ScatterChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </div>

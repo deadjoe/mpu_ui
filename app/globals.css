@@ -8,7 +8,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
@@ -30,13 +30,13 @@
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --radius: 0.5rem;
-    --chart-1: 220 70% 50%;  /* CPU - Blue */
-    --chart-2: 142 70% 45%;  /* Memory - Green */
-    --chart-3: 43 74% 66%;   /* IO - Yellow */
-    --chart-4: 326 70% 60%;  /* Network - Pink */
-    --chart-5: 265 70% 55%;  /* Swap - Purple */
+    --chart-1: 220 70% 50%; /* CPU - Blue */
+    --chart-2: 142 70% 45%; /* Memory - Green */
+    --chart-3: 43 74% 66%; /* IO - Yellow */
+    --chart-4: 326 70% 60%; /* Network - Pink */
+    --chart-5: 265 70% 55%; /* Swap - Purple */
   }
- 
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -57,14 +57,14 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;  /* CPU - Blue */
-    --chart-2: 142 70% 45%;  /* Memory - Green */
-    --chart-3: 43 74% 66%;   /* IO - Yellow */
-    --chart-4: 326 70% 60%;  /* Network - Pink */
-    --chart-5: 265 70% 55%;  /* Swap - Purple */
+    --chart-1: 220 70% 50%; /* CPU - Blue */
+    --chart-2: 142 70% 45%; /* Memory - Green */
+    --chart-3: 43 74% 66%; /* IO - Yellow */
+    --chart-4: 326 70% 60%; /* Network - Pink */
+    --chart-5: 265 70% 55%; /* Swap - Purple */
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;

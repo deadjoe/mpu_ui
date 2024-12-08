@@ -4,7 +4,7 @@ import { useState } from 'react'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import { Plus, Package, Tag, Download, Trash2, Power, PowerOff } from 'lucide-react'
 import Image from 'next/image'
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button'
 
 // Mock data for services
 const initialServices = [
@@ -123,7 +123,7 @@ export default function ServicesPage() {
             </div>
             <div className="border-t border-border">
               <ul className="divide-y divide-border">
-                {services.map((service) => (
+                {services.map(service => (
                   <li
                     key={service.id}
                     className={`p-4 cursor-pointer hover:bg-muted ${
@@ -205,11 +205,9 @@ export default function ServicesPage() {
 
                 {/* Versions List */}
                 <div className="px-6 py-4">
-                  <h3 className="text-lg font-medium text-foreground mb-4">
-                    Available Versions
-                  </h3>
+                  <h3 className="text-lg font-medium text-foreground mb-4">Available Versions</h3>
                   <div className="grid grid-cols-1 gap-4">
-                    {selectedService.dockerImages.map((image) => (
+                    {selectedService.dockerImages.map(image => (
                       <div
                         key={image.version}
                         className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg"
@@ -220,9 +218,7 @@ export default function ServicesPage() {
                             <p className="text-sm font-medium text-foreground">
                               Version {image.version}
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                              {image.status}
-                            </p>
+                            <p className="text-sm text-muted-foreground">{image.status}</p>
                           </div>
                         </div>
                         <div className="flex space-x-2">

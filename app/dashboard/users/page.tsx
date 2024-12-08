@@ -11,10 +11,16 @@ import {
   flexRender,
 } from '@tanstack/react-table'
 import { Edit, Trash2, UserPlus } from 'lucide-react'
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -22,7 +28,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from '@/components/ui/table'
 
 // Mock data
 const initialUsers = [
@@ -42,10 +48,16 @@ const columns = [
   columnHelper.accessor('role', {
     header: 'Role',
     cell: info => (
-      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-        ${info.getValue() === 'admin' ? 'bg-purple-500/20 text-purple-400' :
-          info.getValue() === 'operator' ? 'bg-blue-500/20 text-blue-400' :
-            'bg-muted text-muted-foreground'}`}>
+      <span
+        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
+        ${
+          info.getValue() === 'admin'
+            ? 'bg-purple-500/20 text-purple-400'
+            : info.getValue() === 'operator'
+              ? 'bg-blue-500/20 text-blue-400'
+              : 'bg-muted text-muted-foreground'
+        }`}
+      >
         {info.getValue()}
       </span>
     ),
@@ -57,8 +69,10 @@ const columns = [
   columnHelper.accessor('status', {
     header: 'Status',
     cell: info => (
-      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-        ${info.getValue() === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+      <span
+        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
+        ${info.getValue() === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}
+      >
         {info.getValue()}
       </span>
     ),
@@ -157,10 +171,7 @@ export default function UsersPage() {
                         <TableHead key={header.id}>
                           {header.isPlaceholder
                             ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                            : flexRender(header.column.columnDef.header, header.getContext())}
                         </TableHead>
                       ))}
                     </TableRow>
@@ -171,10 +182,7 @@ export default function UsersPage() {
                     <TableRow key={row.id}>
                       {row.getVisibleCells().map(cell => (
                         <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
                     </TableRow>

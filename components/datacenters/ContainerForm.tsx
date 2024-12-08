@@ -12,20 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-export type Container = {
-  id?: string
-  name: string
-  image: string
-  status: 'running' | 'stopped' | 'paused'
-  hostId: string
-  ports: string[]
-  environment: { [key: string]: string }
-  description?: string
-}
+import type { Container } from '@/types/datacenter'
 
 interface ContainerFormProps {
-  container?: Container | null
+  container?: Container
   onSubmit: (data: Container) => void
   onCancel: () => void
 }

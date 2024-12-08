@@ -12,13 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-export type DataCenter = {
-  id?: string
-  name: string
-  description: string
-  status: 'active' | 'inactive'
-}
+import type { DataCenter } from '@/types/datacenter'
 
 interface DataCenterFormProps {
   dataCenter?: DataCenter
@@ -29,8 +23,10 @@ interface DataCenterFormProps {
 export default function DataCenterForm({ dataCenter, onSubmit, onCancel }: DataCenterFormProps) {
   const [formData, setFormData] = useState<DataCenter>({
     name: dataCenter?.name || '',
+    location: dataCenter?.location || '',
+    coordinates: dataCenter?.coordinates || [0, 0],
     description: dataCenter?.description || '',
-    status: dataCenter?.status || 'active',
+    status: dataCenter?.status || 'inactive',
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -41,9 +37,8 @@ export default function DataCenterForm({ dataCenter, onSubmit, onCancel }: DataC
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">Data Center Name</Label>
+        <Label htmlFor="name">Name</Label>
         <Input
-          type="text"
           id="name"
           value={formData.name}
           onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -52,12 +47,57 @@ export default function DataCenterForm({ dataCenter, onSubmit, onCancel }: DataC
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="location">Location</Label>
+        <Input
+          id="location"
+          value={formData.location}
+          onChange={e => setFormData({ ...formData, location: e.target.value })}
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="latitude">Latitude</Label>
+          <Input
+            id="latitude"
+            type="number"
+            step="0.0001"
+            value={formData.coordinates[0]}
+            onChange={e =>
+              setFormData({
+                ...formData,
+                coordinates: [parseFloat(e.target.value), formData.coordinates[1]],
+              })
+            }
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="longitude">Longitude</Label>
+          <Input
+            id="longitude"
+            type="number"
+            step="0.0001"
+            value={formData.coordinates[1]}
+            onChange={e =>
+              setFormData({
+                ...formData,
+                coordinates: [formData.coordinates[0], parseFloat(e.target.value)],
+              })
+            }
+            required
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
           value={formData.description}
           onChange={e => setFormData({ ...formData, description: e.target.value })}
-          rows={4}
+          required
         />
       </div>
 
@@ -65,8 +105,11 @@ export default function DataCenterForm({ dataCenter, onSubmit, onCancel }: DataC
         <Label htmlFor="status">Status</Label>
         <Select
           value={formData.status}
-          onValueChange={(value: 'active' | 'inactive') =>
-            setFormData({ ...formData, status: value })
+          onValueChange={value =>
+            setFormData({
+              ...formData,
+              status: value as DataCenter['status'],
+            })
           }
         >
           <SelectTrigger>
@@ -75,15 +118,16 @@ export default function DataCenterForm({ dataCenter, onSubmit, onCancel }: DataC
           <SelectContent>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="maintenance">Maintenance</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" type="button" onClick={onCancel}>
+      <div className="flex justify-end space-x-2">
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit">{dataCenter ? 'Update' : 'Create'} Data Center</Button>
+        <Button type="submit">Save</Button>
       </div>
     </form>
   )

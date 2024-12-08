@@ -1,14 +1,30 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Filter, Play, Stop, Trash2, Database } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { cn } from "@/lib/utils"
+import {
+  Play,
+  Pause,
+  Square,
+  RefreshCw,
+  MoreVertical,
+  Plus,
+  Filter,
+  Trash2,
+  Database,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import SystemMetricsChart from '@/components/charts/SystemMetricsChart'
-import PerformanceLineChart from "@/components/charts/PerformanceLineChart"
-import ClusterTopology from "@/components/topology/ClusterTopology"
+import PerformanceLineChart from '@/components/charts/PerformanceLineChart'
+import ClusterTopology from '@/components/topology/ClusterTopology'
 
 // Define types
 interface Instance {
@@ -28,124 +44,124 @@ interface Instance {
 const initialInstances: Instance[] = [
   {
     id: 1,
-    name: "MongoDB",
-    type: "MongoDB",
-    status: "running",
-    version: "6.0.12",
+    name: 'MongoDB',
+    type: 'MongoDB',
+    status: 'running',
+    version: '6.0.12',
     port: 27017,
-    uptime: "5d 12h 30m",
-    memory_usage: "1.2 GB",
-    cpu_usage: "2.5%",
-    connections: 125
+    uptime: '5d 12h 30m',
+    memory_usage: '1.2 GB',
+    cpu_usage: '2.5%',
+    connections: 125,
   },
   {
     id: 2,
-    name: "MySQL",
-    type: "MySQL",
-    status: "stopped",
-    version: "8.0.35",
+    name: 'MySQL',
+    type: 'MySQL',
+    status: 'stopped',
+    version: '8.0.35',
     port: 3306,
-    memory_usage: "0 GB",
-    cpu_usage: "0%",
-    connections: 0
+    memory_usage: '0 GB',
+    cpu_usage: '0%',
+    connections: 0,
   },
   {
     id: 3,
-    name: "MariaDB",
-    type: "MariaDB",
-    status: "stopped",
-    version: "10.11.5",
+    name: 'MariaDB',
+    type: 'MariaDB',
+    status: 'stopped',
+    version: '10.11.5',
     port: 3307,
-    memory_usage: "0 GB",
-    cpu_usage: "0%",
-    connections: 0
+    memory_usage: '0 GB',
+    cpu_usage: '0%',
+    connections: 0,
   },
   {
     id: 4,
-    name: "PostgreSQL",
-    type: "PostgreSQL",
-    status: "stopped",
-    version: "16.1",
+    name: 'PostgreSQL',
+    type: 'PostgreSQL',
+    status: 'stopped',
+    version: '16.1',
     port: 5432,
-    memory_usage: "0 GB",
-    cpu_usage: "0%",
-    connections: 0
+    memory_usage: '0 GB',
+    cpu_usage: '0%',
+    connections: 0,
   },
   {
     id: 5,
-    name: "ElasticSearch",
-    type: "ElasticSearch",
-    status: "stopped",
-    version: "8.11.1",
+    name: 'ElasticSearch',
+    type: 'ElasticSearch',
+    status: 'stopped',
+    version: '8.11.1',
     port: 9200,
-    memory_usage: "0 GB",
-    cpu_usage: "0%",
-    connections: 0
+    memory_usage: '0 GB',
+    cpu_usage: '0%',
+    connections: 0,
   },
   {
     id: 6,
-    name: "Kafka",
-    type: "Kafka",
-    status: "running",
-    version: "3.6.1",
+    name: 'Kafka',
+    type: 'Kafka',
+    status: 'running',
+    version: '3.6.1',
     port: 9092,
-    uptime: "2d 8h 15m",
-    memory_usage: "2.1 GB",
-    cpu_usage: "3.2%",
-    connections: 85
+    uptime: '2d 8h 15m',
+    memory_usage: '2.1 GB',
+    cpu_usage: '3.2%',
+    connections: 85,
   },
   {
     id: 7,
-    name: "Pulsar",
-    type: "Pulsar",
-    status: "running",
-    version: "3.1.1",
+    name: 'Pulsar',
+    type: 'Pulsar',
+    status: 'running',
+    version: '3.1.1',
     port: 6650,
-    uptime: "2d 8h 15m",
-    memory_usage: "1.8 GB",
-    cpu_usage: "2.8%",
-    connections: 62
+    uptime: '2d 8h 15m',
+    memory_usage: '1.8 GB',
+    cpu_usage: '2.8%',
+    connections: 62,
   },
   {
     id: 8,
-    name: "Zookeeper",
-    type: "Zookeeper",
-    status: "running",
-    version: "3.9.1",
+    name: 'Zookeeper',
+    type: 'Zookeeper',
+    status: 'running',
+    version: '3.9.1',
     port: 2181,
-    uptime: "2d 8h 15m",
-    memory_usage: "512 MB",
-    cpu_usage: "1.2%",
-    connections: 28
-  }
+    uptime: '2d 8h 15m',
+    memory_usage: '512 MB',
+    cpu_usage: '1.2%',
+    connections: 28,
+  },
 ]
 
 // Mock data for metrics
 const generateMetricsData = () => {
   return Array.from({ length: 30 }, (_, i) => ({
-    time: new Date(Date.now() - (29 - i) * 240000).toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit'
+    time: new Date(Date.now() - (29 - i) * 240000).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
     }),
-    cpu: Math.floor(Math.random() * 40) + 30,     // 30-70%
-    memory: Math.floor(Math.random() * 30) + 40,  // 40-70%
-    io: Math.floor(Math.random() * 25) + 15,      // 15-40%
+    cpu: Math.floor(Math.random() * 40) + 30, // 30-70%
+    memory: Math.floor(Math.random() * 30) + 40, // 40-70%
+    io: Math.floor(Math.random() * 25) + 15, // 15-40%
     network: Math.floor(Math.random() * 35) + 25, // 25-60%
-    swap: Math.floor(Math.random() * 15) + 5,     // 5-20%
-    iops: Math.floor(Math.random() * 40) + 20,    // 20-60%
+    swap: Math.floor(Math.random() * 15) + 5, // 5-20%
+    iops: Math.floor(Math.random() * 40) + 20, // 20-60%
   }))
 }
 
 // Mock data for performance metrics
 const generatePerformanceData = () => {
   return Array.from({ length: 30 }, (_, i) => ({
-    time: new Date(Date.now() - (29 - i) * 240000).toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit'
+    time: new Date(Date.now() - (29 - i) * 240000).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
     }),
-    qps: Math.floor(Math.random() * 1000) + 500,    // 500-1500 QPS
-    tps: Math.floor(Math.random() * 800) + 300,     // 300-1100 TPS
-    latency: Math.floor(Math.random() * 50) + 10,   // 10-60ms
+    qps: Math.floor(Math.random() * 1000) + 500, // 500-1500 QPS
+    tps: Math.floor(Math.random() * 800) + 300, // 300-1100 TPS
+    latency: Math.floor(Math.random() * 50) + 10, // 10-60ms
   }))
 }
 
@@ -157,8 +173,8 @@ export default function Page() {
   const [performanceData, setPerformanceData] = useState(generatePerformanceData())
 
   // 从instances中获取选中的实例
-  const selectedInstance = selectedInstanceId 
-    ? instances.find(instance => instance.id === selectedInstanceId) 
+  const selectedInstance = selectedInstanceId
+    ? instances.find(instance => instance.id === selectedInstanceId)
     : null
 
   // 每分钟更新一次性能数据
@@ -213,12 +229,12 @@ export default function Page() {
               </div>
             </div>
             <ul className="divide-y divide-border">
-              {instances.map((instance) => (
+              {instances.map(instance => (
                 <li
                   key={instance.id}
                   className={cn(
-                    "p-4 cursor-pointer hover:bg-muted",
-                    selectedInstanceId === instance.id ? "bg-muted" : ""
+                    'p-4 cursor-pointer hover:bg-muted',
+                    selectedInstanceId === instance.id ? 'bg-muted' : ''
                   )}
                   onClick={() => setSelectedInstanceId(instance.id)}
                 >
@@ -226,9 +242,7 @@ export default function Page() {
                     <div className="flex items-center space-x-3">
                       <Database className="h-6 w-6 text-muted-foreground" />
                       <div>
-                        <p className="text-sm font-medium text-foreground">
-                          {instance.name}
-                        </p>
+                        <p className="text-sm font-medium text-foreground">{instance.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {instance.type} {instance.version}
                         </p>
@@ -236,12 +250,12 @@ export default function Page() {
                     </div>
                     <span
                       className={cn(
-                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
                         instance.status === 'running'
-                          ? "bg-green-500/20 text-green-400"
+                          ? 'bg-green-500/20 text-green-400'
                           : instance.status === 'stopped'
-                            ? "bg-red-500/20 text-red-400"
-                            : "bg-yellow-500/20 text-yellow-400"
+                            ? 'bg-red-500/20 text-red-400'
+                            : 'bg-yellow-500/20 text-yellow-400'
                       )}
                     >
                       {instance.status}
@@ -269,7 +283,7 @@ export default function Page() {
                     </div>
                     <div className="flex space-x-2">
                       {selectedInstance.status === 'stopped' ? (
-                        <Button 
+                        <Button
                           variant="secondary"
                           onClick={() => updateInstanceStatus(selectedInstance.id, 'running')}
                         >
@@ -277,11 +291,11 @@ export default function Page() {
                           Start
                         </Button>
                       ) : (
-                        <Button 
+                        <Button
                           variant="destructive"
                           onClick={() => updateInstanceStatus(selectedInstance.id, 'stopped')}
                         >
-                          <Stop className="h-4 w-4 mr-2" />
+                          <Square className="h-4 w-4 mr-2" />
                           Stop
                         </Button>
                       )}
@@ -340,7 +354,9 @@ export default function Page() {
 
                   {/* System Metrics */}
                   <div className="col-span-3 bg-muted p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-muted-foreground mb-4">System Resource Usage</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-4">
+                      System Resource Usage
+                    </h4>
                     <div className="h-[450px]">
                       <SystemMetricsChart data={metricsData} />
                     </div>
@@ -348,7 +364,9 @@ export default function Page() {
 
                   {/* Performance Metrics */}
                   <div className="col-span-3 bg-muted p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-muted-foreground mb-4">Performance Metrics</h4>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-4">
+                      Performance Metrics
+                    </h4>
                     <div className="h-[350px]">
                       <PerformanceLineChart data={performanceData} />
                     </div>

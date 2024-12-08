@@ -1,23 +1,23 @@
 'use client'
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
-import { 
-  PlusCircle, 
-  Server, 
-  ChevronRight, 
-  Box, 
+import {
+  PlusCircle,
+  Server,
+  ChevronRight,
+  Box,
   Database,
   ChevronDown,
   ChevronUp,
   Expand,
   Shrink,
-  GripVertical
+  GripVertical,
 } from 'lucide-react'
-import ReactFlow, { 
-  Background, 
-  Controls, 
-  MiniMap, 
-  Handle, 
+import ReactFlow, {
+  Background,
+  Controls,
+  MiniMap,
+  Handle,
   Position,
   Node,
   Edge,
@@ -25,13 +25,15 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   ConnectionMode,
+  OnConnect,
 } from 'reactflow'
 import dagre from 'dagre'
 import 'reactflow/dist/style.css'
-import DataCenterForm, { DataCenter } from '@/components/datacenters/DataCenterForm'
-import HostForm, { Host } from '@/components/datacenters/HostForm'
-import HostGroupForm, { HostGroup } from '@/components/datacenters/HostGroupForm'
-import ContainerForm, { Container } from '@/components/datacenters/ContainerForm'
+import type { DataCenter, Host, HostGroup, Container, NodeData } from '@/types/datacenter'
+import DataCenterForm from '@/components/datacenters/DataCenterForm'
+import HostForm from '@/components/datacenters/HostForm'
+import HostGroupForm from '@/components/datacenters/HostGroupForm'
+import ContainerForm from '@/components/datacenters/ContainerForm'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -41,11 +43,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { useTheme } from 'next-themes'
 import DashboardLayout from '@/components/layout/DashboardLayout'
-import {
-  ResizablePanel,
-  ResizablePanelGroup,
-  ResizableHandle,
-} from "@/components/ui/resizable"
+import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from '@/components/ui/resizable'
 
 // Add custom CSS for ReactFlow nodes
 const styles = `
@@ -62,15 +60,19 @@ const styles = `
 // Mock data
 const mockDataCenters: DataCenter[] = [
   {
-    id: '1',
-    name: 'Shanghai DC 1',
-    description: 'Shanghai Primary Data Center',
+    id: 'dc1',
+    name: 'Shanghai DC',
+    location: 'Shanghai, China',
+    coordinates: [121.4737, 31.2304],
+    description: 'Primary data center in Shanghai',
     status: 'active',
   },
   {
-    id: '2',
-    name: 'Beijing DC 1',
-    description: 'Beijing Disaster Recovery Data Center',
+    id: 'dc2',
+    name: 'Beijing DC',
+    location: 'Beijing, China',
+    coordinates: [116.4074, 39.9042],
+    description: 'Secondary data center in Beijing',
     status: 'active',
   },
 ]
@@ -85,7 +87,7 @@ const mockHosts: Host[] = [
     description: 'Shanghai Trading DB Server 1',
     tags: ['production', 'database'],
     status: 'running',
-    dataCenterId: '1',
+    dataCenterId: 'dc1',
     hostGroupId: 'g1',
   },
   {
@@ -96,7 +98,7 @@ const mockHosts: Host[] = [
     description: 'Shanghai Trading DB Server 2',
     tags: ['production', 'database'],
     status: 'running',
-    dataCenterId: '1',
+    dataCenterId: 'dc1',
     hostGroupId: 'g1',
   },
   {
@@ -107,7 +109,7 @@ const mockHosts: Host[] = [
     description: 'Shanghai Trading DB Server 3',
     tags: ['production', 'database'],
     status: 'running',
-    dataCenterId: '1',
+    dataCenterId: 'dc1',
     hostGroupId: 'g1',
   },
   {
@@ -118,7 +120,7 @@ const mockHosts: Host[] = [
     description: 'Shanghai MDM DB Server 1',
     tags: ['production', 'database'],
     status: 'running',
-    dataCenterId: '1',
+    dataCenterId: 'dc1',
     hostGroupId: 'g2',
   },
   {
@@ -129,7 +131,7 @@ const mockHosts: Host[] = [
     description: 'Shanghai MDM DB Server 2',
     tags: ['production', 'database'],
     status: 'running',
-    dataCenterId: '1',
+    dataCenterId: 'dc1',
     hostGroupId: 'g2',
   },
   {
@@ -140,7 +142,7 @@ const mockHosts: Host[] = [
     description: 'Shanghai MDM DB Server 3',
     tags: ['production', 'database'],
     status: 'running',
-    dataCenterId: '1',
+    dataCenterId: 'dc1',
     hostGroupId: 'g2',
   },
   // Beijing DC Hosts
@@ -152,7 +154,7 @@ const mockHosts: Host[] = [
     description: 'Beijing DR Trading DB Server 1',
     tags: ['dr', 'database'],
     status: 'running',
-    dataCenterId: '2',
+    dataCenterId: 'dc2',
     hostGroupId: 'g3',
   },
   {
@@ -163,7 +165,7 @@ const mockHosts: Host[] = [
     description: 'Beijing DR Trading DB Server 2',
     tags: ['dr', 'database'],
     status: 'running',
-    dataCenterId: '2',
+    dataCenterId: 'dc2',
     hostGroupId: 'g3',
   },
   {
@@ -174,7 +176,7 @@ const mockHosts: Host[] = [
     description: 'Beijing DR Trading DB Server 3',
     tags: ['dr', 'database'],
     status: 'running',
-    dataCenterId: '2',
+    dataCenterId: 'dc2',
     hostGroupId: 'g3',
   },
   {
@@ -185,7 +187,7 @@ const mockHosts: Host[] = [
     description: 'Beijing DR MDM DB Server 1',
     tags: ['dr', 'database'],
     status: 'running',
-    dataCenterId: '2',
+    dataCenterId: 'dc2',
     hostGroupId: 'g4',
   },
   {
@@ -196,7 +198,7 @@ const mockHosts: Host[] = [
     description: 'Beijing DR MDM DB Server 2',
     tags: ['dr', 'database'],
     status: 'running',
-    dataCenterId: '2',
+    dataCenterId: 'dc2',
     hostGroupId: 'g4',
   },
   {
@@ -207,7 +209,7 @@ const mockHosts: Host[] = [
     description: 'Beijing DR MDM DB Server 3',
     tags: ['dr', 'database'],
     status: 'running',
-    dataCenterId: '2',
+    dataCenterId: 'dc2',
     hostGroupId: 'g4',
   },
 ]
@@ -218,28 +220,28 @@ const mockHostGroups: HostGroup[] = [
     name: 'Online Trading DB Group',
     description: 'Shanghai Trading Database Servers',
     hosts: mockHosts.filter(h => h.hostGroupId === 'g1'),
-    dataCenterId: '1',
+    dataCenterId: 'dc1',
   },
   {
     id: 'g2',
     name: 'MDM DB Group',
     description: 'Shanghai MDM Database Servers',
     hosts: mockHosts.filter(h => h.hostGroupId === 'g2'),
-    dataCenterId: '1',
+    dataCenterId: 'dc1',
   },
   {
     id: 'g3',
     name: 'DR_Trading DB Group',
     description: 'Beijing DR Trading Database Servers',
     hosts: mockHosts.filter(h => h.hostGroupId === 'g3'),
-    dataCenterId: '2',
+    dataCenterId: 'dc2',
   },
   {
     id: 'g4',
     name: 'DR_MDM DB Group',
     description: 'Beijing DR MDM Database Servers',
     hosts: mockHosts.filter(h => h.hostGroupId === 'g4'),
-    dataCenterId: '2',
+    dataCenterId: 'dc2',
   },
 ]
 
@@ -252,9 +254,9 @@ const mockContainers: Container[] = [
     status: 'running',
     hostId: 'h1',
     ports: ['3306:3306'],
-    environment: { 
+    environment: {
       MYSQL_ROOT_PASSWORD: '******',
-      MYSQL_DATABASE: 'trading_db' 
+      MYSQL_DATABASE: 'trading_db',
     },
     description: 'Trading Database Master',
   },
@@ -277,7 +279,7 @@ const mockContainers: Container[] = [
     ports: ['9092:9092'],
     environment: {
       KAFKA_BROKER_ID: '1',
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181',
     },
     description: 'Message Queue Broker 1',
   },
@@ -290,9 +292,9 @@ const mockContainers: Container[] = [
     status: 'running',
     hostId: 'h2',
     ports: ['3306:3306'],
-    environment: { 
+    environment: {
       MYSQL_ROOT_PASSWORD: '******',
-      MYSQL_DATABASE: 'trading_db'
+      MYSQL_DATABASE: 'trading_db',
     },
     description: 'Trading Database Slave 1',
   },
@@ -315,9 +317,9 @@ const mockContainers: Container[] = [
     status: 'running',
     hostId: 'h3',
     ports: ['3306:3306'],
-    environment: { 
+    environment: {
       MYSQL_ROOT_PASSWORD: '******',
-      MYSQL_DATABASE: 'trading_db'
+      MYSQL_DATABASE: 'trading_db',
     },
     description: 'Trading Database Slave 2',
   },
@@ -339,9 +341,9 @@ const mockContainers: Container[] = [
     hostId: 'h3',
     ports: ['9200:9200', '9300:9300'],
     environment: {
-      'ES_JAVA_OPTS': '-Xms2g -Xmx2g',
+      ES_JAVA_OPTS: '-Xms2g -Xmx2g',
       'discovery.type': 'single-node',
-      'xpack.security.enabled': 'false'
+      'xpack.security.enabled': 'false',
     },
     description: 'Elasticsearch Node 1',
   },
@@ -353,7 +355,7 @@ const mockContainers: Container[] = [
     hostId: 'h3',
     ports: ['5601:5601'],
     environment: {
-      'ELASTICSEARCH_HOSTS': 'http://elasticsearch-1:9200'
+      ELASTICSEARCH_HOSTS: 'http://elasticsearch-1:9200',
     },
     description: 'Kibana Dashboard',
   },
@@ -368,7 +370,7 @@ const mockContainers: Container[] = [
     ports: ['5432:5432'],
     environment: {
       POSTGRES_PASSWORD: '******',
-      POSTGRES_DB: 'mdm_db'
+      POSTGRES_DB: 'mdm_db',
     },
     description: 'MDM Database Master',
   },
@@ -381,7 +383,7 @@ const mockContainers: Container[] = [
     ports: ['27017:27017'],
     environment: {
       MONGO_INITDB_ROOT_USERNAME: 'admin',
-      MONGO_INITDB_ROOT_PASSWORD: '******'
+      MONGO_INITDB_ROOT_PASSWORD: '******',
     },
     description: 'Document Store Master',
   },
@@ -396,7 +398,7 @@ const mockContainers: Container[] = [
     ports: ['5432:5432'],
     environment: {
       POSTGRES_PASSWORD: '******',
-      POSTGRES_DB: 'mdm_db'
+      POSTGRES_DB: 'mdm_db',
     },
     description: 'MDM Database Slave',
   },
@@ -409,7 +411,7 @@ const mockContainers: Container[] = [
     ports: ['27017:27017'],
     environment: {
       MONGO_INITDB_ROOT_USERNAME: 'admin',
-      MONGO_INITDB_ROOT_PASSWORD: '******'
+      MONGO_INITDB_ROOT_PASSWORD: '******',
     },
     description: 'Document Store Replica',
   },
@@ -424,7 +426,7 @@ const mockContainers: Container[] = [
     ports: ['3306:3306'],
     environment: {
       MYSQL_ROOT_PASSWORD: '******',
-      MYSQL_DATABASE: 'trading_db'
+      MYSQL_DATABASE: 'trading_db',
     },
     description: 'DR Trading Database Master',
   },
@@ -456,9 +458,9 @@ const mockContainers: Container[] = [
     hostId: 'h6',
     ports: ['9200:9200', '9300:9300'],
     environment: {
-      'ES_JAVA_OPTS': '-Xms2g -Xmx2g',
+      ES_JAVA_OPTS: '-Xms2g -Xmx2g',
       'discovery.type': 'single-node',
-      'xpack.security.enabled': 'false'
+      'xpack.security.enabled': 'false',
     },
     description: 'Elasticsearch Node 2',
   },
@@ -470,7 +472,7 @@ const mockContainers: Container[] = [
     hostId: 'h6',
     ports: ['5601:5601'],
     environment: {
-      'ELASTICSEARCH_HOSTS': 'http://elasticsearch-2:9200'
+      ELASTICSEARCH_HOSTS: 'http://elasticsearch-2:9200',
     },
     description: 'Kibana Dashboard',
   },
@@ -485,7 +487,7 @@ const mockContainers: Container[] = [
     ports: ['3306:3306'],
     environment: {
       MYSQL_ROOT_PASSWORD: '******',
-      MYSQL_DATABASE: 'trading_db'
+      MYSQL_DATABASE: 'trading_db',
     },
     description: 'DR Trading Database Slave',
   },
@@ -510,7 +512,7 @@ const mockContainers: Container[] = [
     ports: ['3306:3306'],
     environment: {
       MARIADB_ROOT_PASSWORD: '******',
-      MARIADB_DATABASE: 'mdm_db'
+      MARIADB_DATABASE: 'mdm_db',
     },
     description: 'DR MDM Database Master',
   },
@@ -523,7 +525,7 @@ const mockContainers: Container[] = [
     ports: ['27017:27017'],
     environment: {
       MONGO_INITDB_ROOT_USERNAME: 'admin',
-      MONGO_INITDB_ROOT_PASSWORD: '******'
+      MONGO_INITDB_ROOT_PASSWORD: '******',
     },
     description: 'DR Document Store Master',
   },
@@ -545,9 +547,9 @@ const mockContainers: Container[] = [
     hostId: 'h8',
     ports: ['9200:9200', '9300:9300'],
     environment: {
-      'ES_JAVA_OPTS': '-Xms2g -Xmx2g',
+      ES_JAVA_OPTS: '-Xms2g -Xmx2g',
       'discovery.type': 'single-node',
-      'xpack.security.enabled': 'false'
+      'xpack.security.enabled': 'false',
     },
     description: 'Elasticsearch Node 3',
   },
@@ -559,7 +561,7 @@ const mockContainers: Container[] = [
     hostId: 'h8',
     ports: ['5601:5601'],
     environment: {
-      'ELASTICSEARCH_HOSTS': 'http://elasticsearch-3:9200'
+      ELASTICSEARCH_HOSTS: 'http://elasticsearch-3:9200',
     },
     description: 'Kibana Dashboard',
   },
@@ -574,7 +576,7 @@ const mockContainers: Container[] = [
     ports: ['3306:3306'],
     environment: {
       MARIADB_ROOT_PASSWORD: '******',
-      MARIADB_DATABASE: 'mdm_db'
+      MARIADB_DATABASE: 'mdm_db',
     },
     description: 'DR MDM Database Slave',
   },
@@ -587,10 +589,10 @@ const mockContainers: Container[] = [
     ports: ['27017:27017'],
     environment: {
       MONGO_INITDB_ROOT_USERNAME: 'admin',
-      MONGO_INITDB_ROOT_PASSWORD: '******'
+      MONGO_INITDB_ROOT_PASSWORD: '******',
     },
     description: 'DR Document Store Slave',
-  }
+  },
 ]
 
 export default function DataCentersPage() {
@@ -611,18 +613,14 @@ export default function DataCentersPage() {
   const { theme } = useTheme()
 
   const toggleExpand = (id: string) => {
-    setExpandedItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    )
+    setExpandedItems(prev => (prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]))
   }
 
   const expandAll = () => {
     const allIds = [
       ...mockDataCenters.map(dc => dc.id),
       ...mockHostGroups.map(hg => hg.id),
-      ...mockHosts.map(h => h.id)
+      ...mockHosts.map(h => h.id),
     ]
     setExpandedItems(allIds)
   }
@@ -642,22 +640,29 @@ export default function DataCentersPage() {
     : []
 
   // Get containers for selected host
-  const selectedHostContainers = useMemo(() => 
-    selectedHost ? containers.filter(container => container.hostId === selectedHost.id) : []
-  , [selectedHost, containers])
+  const selectedHostContainers = useMemo(
+    () =>
+      selectedHost ? containers.filter(container => container.hostId === selectedHost.id) : [],
+    [selectedHost, containers]
+  )
 
   // Custom Node components
   const CustomNode = ({ data }: NodeProps) => {
     return (
-      <div className={cn(
-        "px-3 py-2 rounded-lg shadow-lg border",
-        "bg-card text-card-foreground dark:bg-card dark:text-card-foreground",
-        "min-w-[180px]"
-      )}>
+      <div
+        className={cn(
+          'px-3 py-2 rounded-lg shadow-lg border',
+          'bg-card text-card-foreground dark:bg-card dark:text-card-foreground',
+          'min-w-[180px]'
+        )}
+      >
         <div className="flex items-center gap-2">
           {data.icon}
           <span className="text-sm font-medium">{data.label}</span>
-          <Badge variant={data.status === 'active' ? "success" : "secondary"} className="ml-auto text-xs">
+          <Badge
+            variant={data.status === 'active' ? 'success' : 'secondary'}
+            className="ml-auto text-xs"
+          >
             {data.status}
           </Badge>
         </div>
@@ -668,9 +673,12 @@ export default function DataCentersPage() {
     )
   }
 
-  const nodeTypes = useMemo(() => ({
-    custom: CustomNode
-  }), [])
+  const nodeTypes = useMemo(
+    () => ({
+      custom: CustomNode,
+    }),
+    []
+  )
 
   // Layout algorithm
   const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => {
@@ -679,26 +687,26 @@ export default function DataCentersPage() {
 
     const nodeWidth = 180
     const nodeHeight = 80
-    
+
     // Configure the layout algorithm with optimized parameters
     dagreGraph.setGraph({
       rankdir: direction,
       ranker: 'network-simplex', // Changed from 'tight-tree' for better distribution
-      align: 'DL',               // Changed to 'DL' for better alignment
-      nodesep: 120,              // Increased from 80
-      ranksep: 150,              // Increased from 100
-      edgesep: 80,               // Increased from 50
-      marginx: 50,               // Added margin
-      marginy: 50,               // Added margin
+      align: 'DL', // Changed to 'DL' for better alignment
+      nodesep: 120, // Increased from 80
+      ranksep: 150, // Increased from 100
+      edgesep: 80, // Increased from 50
+      marginx: 50, // Added margin
+      marginy: 50, // Added margin
     })
 
     // Add nodes to the graph
-    nodes.forEach((node) => {
+    nodes.forEach(node => {
       dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight })
     })
 
     // Add edges to the graph
-    edges.forEach((edge) => {
+    edges.forEach(edge => {
       dagreGraph.setEdge(edge.source, edge.target)
     })
 
@@ -706,7 +714,7 @@ export default function DataCentersPage() {
     dagre.layout(dagreGraph)
 
     // Get the positioned nodes
-    const positionedNodes = nodes.map((node) => {
+    const positionedNodes = nodes.map(node => {
       const nodeWithPosition = dagreGraph.node(node.id)
       return {
         ...node,
@@ -728,7 +736,7 @@ export default function DataCentersPage() {
         {
           id: selectedHost.id,
           type: 'custom',
-          data: { 
+          data: {
             label: selectedHost.name,
             icon: <Server className="w-4 h-4" />,
             status: selectedHost.status,
@@ -736,10 +744,10 @@ export default function DataCentersPage() {
           },
           position: { x: 0, y: 0 },
         },
-        ...selectedHostContainers.map((container) => ({
+        ...selectedHostContainers.map(container => ({
           id: container.id,
           type: 'custom',
-          data: { 
+          data: {
             label: `${container.name}\n(${container.image})`,
             icon: <Box className="w-4 h-4" />,
             status: container.status,
@@ -766,7 +774,7 @@ export default function DataCentersPage() {
         {
           id: selectedHostGroup.id,
           type: 'custom',
-          data: { 
+          data: {
             label: selectedHostGroup.name,
             icon: <Database className="w-4 h-4" />,
             status: 'active',
@@ -774,10 +782,10 @@ export default function DataCentersPage() {
           },
           position: { x: 0, y: 0 },
         },
-        ...selectedGroupHosts.map((host) => ({
+        ...selectedGroupHosts.map(host => ({
           id: host.id,
           type: 'custom',
-          data: { 
+          data: {
             label: host.name,
             icon: <Server className="w-4 h-4" />,
             status: host.status,
@@ -805,7 +813,7 @@ export default function DataCentersPage() {
         {
           id: selectedDataCenter.id,
           type: 'custom',
-          data: { 
+          data: {
             label: selectedDataCenter.name,
             icon: <Database className="w-4 h-4" />,
             status: selectedDataCenter.status,
@@ -813,10 +821,10 @@ export default function DataCentersPage() {
           },
           position: { x: 0, y: 0 },
         },
-        ...dcHostGroups.map((group) => ({
+        ...dcHostGroups.map(group => ({
           id: group.id,
           type: 'custom',
-          data: { 
+          data: {
             label: group.name,
             icon: <Server className="w-4 h-4" />,
             status: 'active',
@@ -838,7 +846,14 @@ export default function DataCentersPage() {
     }
 
     return { nodes: [], edges: [] }
-  }, [selectedDataCenter, selectedHostGroup, selectedHost, hostGroups, selectedHostContainers, selectedGroupHosts])
+  }, [
+    selectedDataCenter,
+    selectedHostGroup,
+    selectedHost,
+    hostGroups,
+    selectedHostContainers,
+    selectedGroupHosts,
+  ])
 
   // Set initial nodes and edges only when selection changes
   useEffect(() => {
@@ -846,20 +861,14 @@ export default function DataCentersPage() {
     setEdges([...layoutedEdges])
   }, [selectedDataCenter, selectedHostGroup, selectedHost])
 
+  const onConnect: OnConnect = params => console.log(params)
+
   return (
     <DashboardLayout>
       <style>{styles}</style>
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="h-[calc(100vh-5rem)]"
-      >
+      <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-5rem)]">
         {/* Left panel - Resources */}
-        <ResizablePanel 
-          defaultSize={25}
-          minSize={20}
-          maxSize={40}
-          className="bg-background"
-        >
+        <ResizablePanel defaultSize={25} minSize={20} maxSize={40} className="bg-background">
           <Card className="w-full h-full border-border bg-card">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-card-foreground">Resources</CardTitle>
@@ -888,11 +897,11 @@ export default function DataCentersPage() {
               <ScrollArea className="h-[calc(100vh-10rem)]">
                 <div className="space-y-4">
                   {/* Data Centers */}
-                  {dataCenters.map((dc) => (
+                  {dataCenters.map(dc => (
                     <div key={dc.id} className="space-y-2">
                       <Collapsible open={expandedItems.includes(dc.id)}>
-                        <CollapsibleTrigger 
-                          onClick={(e) => {
+                        <CollapsibleTrigger
+                          onClick={e => {
                             e.stopPropagation()
                             toggleExpand(dc.id)
                             setSelectedDataCenter(dc)
@@ -900,8 +909,8 @@ export default function DataCentersPage() {
                             setSelectedHost(null)
                           }}
                           className={cn(
-                            "flex items-center gap-2 w-full hover:bg-accent hover:text-accent-foreground rounded-md p-2",
-                            selectedDataCenter?.id === dc.id && "bg-accent text-accent-foreground"
+                            'flex items-center gap-2 w-full hover:bg-accent hover:text-accent-foreground rounded-md p-2',
+                            selectedDataCenter?.id === dc.id && 'bg-accent text-accent-foreground'
                           )}
                         >
                           {expandedItems.includes(dc.id) ? (
@@ -911,7 +920,10 @@ export default function DataCentersPage() {
                           )}
                           <Database className="h-4 w-4" />
                           <span className="text-sm font-medium">{dc.name}</span>
-                          <Badge variant={dc.status === 'active' ? "success" : "secondary"} className="ml-auto">
+                          <Badge
+                            variant={dc.status === 'active' ? 'success' : 'secondary'}
+                            className="ml-auto"
+                          >
                             {dc.status}
                           </Badge>
                         </CollapsibleTrigger>
@@ -919,11 +931,11 @@ export default function DataCentersPage() {
                           {/* Host Groups */}
                           {hostGroups
                             .filter(hg => hg.dataCenterId === dc.id)
-                            .map((hg) => (
+                            .map(hg => (
                               <div key={hg.id}>
                                 <Collapsible open={expandedItems.includes(hg.id)}>
-                                  <CollapsibleTrigger 
-                                    onClick={(e) => {
+                                  <CollapsibleTrigger
+                                    onClick={e => {
                                       e.stopPropagation()
                                       toggleExpand(hg.id)
                                       setSelectedDataCenter(dc)
@@ -931,8 +943,9 @@ export default function DataCentersPage() {
                                       setSelectedHost(null)
                                     }}
                                     className={cn(
-                                      "flex items-center gap-2 w-full hover:bg-accent hover:text-accent-foreground rounded-md p-2",
-                                      selectedHostGroup?.id === hg.id && "bg-accent text-accent-foreground"
+                                      'flex items-center gap-2 w-full hover:bg-accent hover:text-accent-foreground rounded-md p-2',
+                                      selectedHostGroup?.id === hg.id &&
+                                        'bg-accent text-accent-foreground'
                                     )}
                                   >
                                     {expandedItems.includes(hg.id) ? (
@@ -947,11 +960,11 @@ export default function DataCentersPage() {
                                     {/* Hosts */}
                                     {hosts
                                       .filter(host => host.hostGroupId === hg.id)
-                                      .map((host) => (
+                                      .map(host => (
                                         <div key={host.id}>
                                           <Collapsible open={expandedItems.includes(host.id)}>
-                                            <CollapsibleTrigger 
-                                              onClick={(e) => {
+                                            <CollapsibleTrigger
+                                              onClick={e => {
                                                 e.stopPropagation()
                                                 toggleExpand(host.id)
                                                 setSelectedDataCenter(dc)
@@ -959,8 +972,9 @@ export default function DataCentersPage() {
                                                 setSelectedHost(host)
                                               }}
                                               className={cn(
-                                                "flex items-center gap-2 w-full hover:bg-accent hover:text-accent-foreground rounded-md p-2",
-                                                selectedHost?.id === host.id && "bg-accent text-accent-foreground"
+                                                'flex items-center gap-2 w-full hover:bg-accent hover:text-accent-foreground rounded-md p-2',
+                                                selectedHost?.id === host.id &&
+                                                  'bg-accent text-accent-foreground'
                                               )}
                                             >
                                               {expandedItems.includes(host.id) ? (
@@ -969,8 +983,19 @@ export default function DataCentersPage() {
                                                 <ChevronRight className="h-4 w-4" />
                                               )}
                                               <Server className="h-4 w-4" />
-                                              <span className="text-sm font-medium">{host.name}</span>
-                                              <Badge variant={host.status === 'active' ? "success" : "secondary"} className="ml-auto">
+                                              <span className="text-sm font-medium">
+                                                {host.name}
+                                              </span>
+                                              <Badge
+                                                variant={
+                                                  host.status === 'running'
+                                                    ? 'success'
+                                                    : host.status === 'stopped'
+                                                      ? 'secondary'
+                                                      : 'warning'
+                                                }
+                                                className="ml-auto"
+                                              >
                                                 {host.status}
                                               </Badge>
                                             </CollapsibleTrigger>
@@ -978,14 +1003,25 @@ export default function DataCentersPage() {
                                               {/* Containers */}
                                               {containers
                                                 .filter(container => container.hostId === host.id)
-                                                .map((container) => (
+                                                .map(container => (
                                                   <div
                                                     key={container.id}
                                                     className="flex items-center gap-2 hover:bg-accent hover:text-accent-foreground rounded-md p-2"
                                                   >
                                                     <Box className="h-4 w-4" />
-                                                    <span className="text-sm font-medium">{container.name}</span>
-                                                    <Badge variant={container.status === 'active' ? "success" : "secondary"} className="ml-auto">
+                                                    <span className="text-sm font-medium">
+                                                      {container.name}
+                                                    </span>
+                                                    <Badge
+                                                      variant={
+                                                        container.status === 'running'
+                                                          ? 'success'
+                                                          : container.status === 'stopped'
+                                                            ? 'secondary'
+                                                            : 'warning'
+                                                      }
+                                                      className="ml-auto"
+                                                    >
                                                       {container.status}
                                                     </Badge>
                                                   </div>
@@ -1072,26 +1108,20 @@ export default function DataCentersPage() {
                 edges={edges}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
                 nodeTypes={nodeTypes}
                 fitView
-                defaultZoom={0.7}
-                minZoom={0.1}
-                maxZoom={1.5}
-                defaultViewport={{
-                  x: 0,
-                  y: 0,
-                  zoom: 0.7
-                }}
-                connectionMode={ConnectionMode.STRICT}
-                className="bg-background"
+                attributionPosition="bottom-left"
+                connectionMode={ConnectionMode.Strict}
                 defaultEdgeOptions={{
                   type: 'smoothstep',
                   animated: true,
-                  style: { 
+                  style: {
                     stroke: theme === 'dark' ? 'hsl(var(--primary))' : 'hsl(var(--primary))',
                     strokeWidth: 2,
                   },
                 }}
+                className="bg-background"
               >
                 <Background className="bg-muted" color="#666" gap={16} />
                 <Controls className="bg-card border-border" />

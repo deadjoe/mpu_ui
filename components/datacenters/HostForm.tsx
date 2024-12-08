@@ -13,16 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
-export type Host = {
-  id?: string
-  name: string
-  ip: string
-  type: 'physical' | 'virtualized'
-  description: string
-  tags: string[]
-  status: 'running' | 'stopped' | 'initializing'
-}
+import type { Host } from '@/types/datacenter'
 
 interface HostFormProps {
   host?: Host
