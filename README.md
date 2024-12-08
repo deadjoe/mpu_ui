@@ -26,28 +26,32 @@ MPU UI is a modern web interface for enterprise resource management, built with 
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 
 ### Installation
 
 1. Clone the repository:
-\`\`\`bash
-git clone https://github.com/deadjoe/mpu_ui.git
-cd mpu_ui
-\`\`\`
+   \`\`\`bash
+   git clone https://github.com/deadjoe/mpu_ui.git
+   cd mpu_ui
+   \`\`\`
 
 2. Install dependencies:
-\`\`\`bash
-npm install
+   \`\`\`bash
+   npm install
+
 # or
+
 yarn install
 \`\`\`
 
 3. Start the development server:
-\`\`\`bash
-npm run dev
+   \`\`\`bash
+   npm run dev
+
 # or
+
 yarn dev
 \`\`\`
 
