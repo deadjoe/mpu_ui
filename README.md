@@ -32,18 +32,22 @@ MPU UI is a modern web interface for enterprise resource management, built with 
 | Styling | tailwindcss-animate | ^1.0.7 | Animation utilities for Tailwind |
 | State Management | Zustand | ^4.4.7 | State management library |
 | Data Fetching | @tanstack/react-query | ^5.13.4 | Data fetching and caching |
+| Table Management | @tanstack/react-table | ^8.10.7 | Table management library |
+| Panel Management | react-resizable-panels | ^2.1.7 | Resizable panel components |
 
 ### UI Components & Design
 
 | Category | Technology | Version | Description |
 |----------|------------|---------|-------------|
 | Icons | lucide-react | ^0.294.0 | Icon library |
+| Icons | @radix-ui/react-icons | ^1.3.2 | Radix UI icons |
 | Font | Geist | ^1.3.1 | Primary font |
 | Font | IBM Plex Sans | ^5.1.0 | Secondary font |
 | Components | @radix-ui/* | Various | Accessible UI primitives |
 | Styling Utils | class-variance-authority | ^0.7.1 | Component style variants |
 | Styling Utils | tailwind-merge | ^2.5.5 | Tailwind class merging |
 | Styling Utils | clsx | ^2.1.1 | Class name utilities |
+| Styling Utils | classnames | ^2.5.1 | Additional class utilities |
 
 ### Data Visualization & Graphics
 
@@ -84,8 +88,10 @@ MPU UI is a modern web interface for enterprise resource management, built with 
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
+Before you begin, ensure you have met the following requirements:
+- Node.js 20.x or later
+- npm 10.x or later (comes with Node.js)
+- Git
 
 ### Installation
 
@@ -98,22 +104,46 @@ MPU UI is a modern web interface for enterprise resource management, built with 
 2. Install dependencies:
    ```bash
    npm install
+   ```
 
-# or
+3. Set up environment variables:
+   ```bash
+   cp .env.example .env.local    # Create a local environment file
+   ```
+   Edit `.env.local` and configure your environment variables.
 
-yarn install
-```
-
-3. Start the development server:
+4. Run the development server:
    ```bash
    npm run dev
+   ```
 
-# or
+5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-yarn dev
-```
+### Development Scripts
 
-4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Run ESLint with auto-fix
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+- `npm run type-check` - Run TypeScript type checking
+- `npm run prepare` - Run all checks (format, lint, type-check)
+
+### Production Deployment
+
+1. Build the application:
+   ```bash
+   npm run build
+   ```
+
+2. Start the production server:
+   ```bash
+   npm run start
+   ```
+
+The application will be available on port 3000 by default. You can modify the port by setting the `PORT` environment variable.
 
 ## Development
 
