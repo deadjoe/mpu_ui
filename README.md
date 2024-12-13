@@ -14,6 +14,8 @@ MPU UI is a modern web interface for enterprise resource management, built with 
 
 ## Technology Stack
 
+> **Version number notation**: In the version columns below, the caret symbol (^) indicates compatibility with all future minor/patch versions. For example, `^5.0.0` means the package is compatible with versions from 5.0.0 up to, but not including, 6.0.0. This ensures you get bug fixes and new features while maintaining backwards compatibility.
+
 ### Core Technologies
 
 | Category | Technology | Version | Description |
